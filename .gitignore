@@ -1,5 +1,6 @@
 dist/
 dist-production/
+/dist-production-manifest.json
 node_modules/
 .runs/
 *.log

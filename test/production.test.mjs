@@ -4,9 +4,9 @@ import { readFile, writeFile, mkdir, mkdtemp, rm, copyFile, realpath } from 'nod
 import path from 'node:path';
 import { request } from 'node:http';
 import { createHash } from 'node:crypto';
-import { ROOT, SOURCE_FILES, DOCUMENT_FILES, PUBLIC_FILES, contained } from '../scripts/contract.mjs';
+import { ROOT, SOURCE_FILES, DOCUMENT_FILES, PUBLIC_FILES, contained, inspectTree } from '../scripts/contract.mjs';
 import { build } from '../scripts/build.mjs';
-import { buildProduction, checkProduction, validateProductionAssets, validateWrangler, ORIGIN, WRANGLER, PRODUCTION_FILES, parseHeaderRules, mergedHeaders, robotsAllows } from '../scripts/production.mjs';
+import { buildProduction, checkProduction, validateProductionAssets, validateWrangler, ORIGIN, WRANGLER, PRODUCTION_FILES, PRODUCTION_MANIFEST, parseHeaderRules, mergedHeaders, robotsAllows } from '../scripts/production.mjs';
 import { startProductionPreview } from '../scripts/production-preview.mjs';
 
 async function fixture(work) {
@@ -143,9 +143,9 @@ test('production transforms head metadata only; UI body, core, CSS and runtime b
   for(const file of ['404.html',...PUBLIC_FILES.filter(f=>/\.(css|mjs)$/.test(f))]) assert.deepEqual(assets.get(file),await readFile(path.join(directory,'public',file)));
 }));
 test('production manifest is deterministic, excludes itself and detects stale output/source',async()=>scenario(async(directory)=>{
-  const first=await readFile(path.join(directory,'dist-production/manifest.json'),'utf8');
+  const first=await readFile(path.join(directory,PRODUCTION_MANIFEST),'utf8');
   await buildProduction(directory);
-  assert.equal(await readFile(path.join(directory,'dist-production/manifest.json'),'utf8'),first);
+  assert.equal(await readFile(path.join(directory,PRODUCTION_MANIFEST),'utf8'),first);
   assert.equal(JSON.parse(first).files.length,12);
   assert.equal(JSON.parse(first).files.some(f=>f.path==='manifest.json'),false);
   await writeFile(path.join(directory,'dist-production/sitemap.xml'),'changed');
@@ -156,6 +156,22 @@ test('production manifest is deterministic, excludes itself and detects stale ou
 }));
 test('production build rejects unknown output rather than silently deleting it',async()=>scenario(async(directory)=>{
   await writeFile(path.join(directory,'dist-production/unexpected.txt'),'unexpected');
+  await assert.rejects(buildProduction(directory),/Unexpected file/);
+}));
+
+test('R1: actual deployed assets contain exactly PRODUCTION_FILES; source manifest stays outside assets',async()=>scenario(async(directory)=>{
+  const configuration=JSON.parse(await readFile(path.join(directory,'wrangler.jsonc'),'utf8'));
+  const actualAssets=path.resolve(directory,configuration.assets.directory);
+  assert.deepEqual(await inspectTree(actualAssets,PRODUCTION_FILES),[...PRODUCTION_FILES].sort());
+  assert.equal(PRODUCTION_FILES.length,12);
+  assert.equal(path.resolve(directory,PRODUCTION_MANIFEST).startsWith(actualAssets+path.sep),false);
+  assert.equal(JSON.parse(await readFile(path.join(directory,PRODUCTION_MANIFEST),'utf8')).sources.length,23);
+  await assert.rejects(readFile(path.join(actualAssets,'manifest.json')),error=>error.code==='ENOENT');
+  await assert.rejects(readFile(path.join(actualAssets,PRODUCTION_MANIFEST)),error=>error.code==='ENOENT');
+}));
+test('R1: an accidentally copied source manifest inside assets blocks check and build',async()=>scenario(async(directory)=>{
+  await copyFile(path.join(directory,PRODUCTION_MANIFEST),path.join(directory,'dist-production/manifest.json'));
+  await assert.rejects(checkProduction(directory),/Unexpected file/);
   await assert.rejects(buildProduction(directory),/Unexpected file/);
 }));
 
@@ -182,7 +198,7 @@ test('actual production HTTP model: canonical effective headers, CSP, redirects,
     for(const [route,target] of [['/','/index.html'],['/en/','/en/index.html']]) {
       const r=await http(port,route);assert.equal(r.status,308);assert.equal(r.headers.location,target);assert.equal(r.headers['x-robots-tag'],'noindex, nofollow');
     }
-    for(const route of ['/missing','/en/missing.html','/_headers','/_redirects','/manifest.json','/package.json']) {
+    for(const route of ['/missing','/en/missing.html','/_headers','/_redirects','/manifest.json','/dist-production-manifest.json','/dist-production/manifest.json','/package.json']) {
       const r=await http(port,route);assert.equal(r.status,404);assert.equal(r.headers['x-robots-tag'],'noindex, nofollow');assert.equal(r.body.includes('id="label-form"'),false);
     }
     assert.equal((await http(port,'/sitemap.xml')).headers['content-type'],'application/xml; charset=utf-8');

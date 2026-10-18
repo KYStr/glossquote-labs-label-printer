@@ -87,7 +87,7 @@ export async function fileRecords(base, files) {
 }
 
 export async function sourceManifest(root = ROOT) {
-  await inspectTree(root, [...SOURCE_FILES, ...DOCUMENT_FILES], { skipRoot: ['.git', 'dist', 'dist-production'] });
+  await inspectTree(root, [...SOURCE_FILES, ...DOCUMENT_FILES], { skipRoot: ['.git', 'dist', 'dist-production', 'dist-production-manifest.json'] });
   return {
     schemaVersion: 1, mode: 'preview',
     sources: await fileRecords(root, SOURCE_FILES),

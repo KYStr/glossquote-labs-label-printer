@@ -5,3 +5,6 @@
 
 後續 UI 驗收全面暫停：所有 browser/native/computer UI 呼叫均禁止，包括 hidden IAB、導航、截圖、輸入及 viewport；僅背景 CLI／檔案可繼續。不能以 hidden 推定不影響焦點。後續 UI 項目為 NOT_RUN_USER_FOCUS_INCIDENT，等待主代理重新明確放行。既有歷史實測保留，不關閉既有視窗、分頁或程序。
 
+
+M2-R1: primary identified that the source inventory was in deployed assets but hidden by the HTTP model. Moved it to root dist-production-manifest.json; exact deployable asset enumeration and accidental-inventory rejection are regression-tested. 133 tests; no UI retest or deployment. Earlier commit remains history.
+

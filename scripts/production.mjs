@@ -8,6 +8,7 @@ import { checkSource } from './check.mjs';
 
 export const ORIGIN = 'https://labels.glossquote.com';
 export const PRODUCTION_FILES = Object.freeze([...PUBLIC_FILES, '_redirects', 'sitemap.xml'].sort());
+export const PRODUCTION_MANIFEST = 'dist-production-manifest.json';
 export const REDIRECTS = Object.freeze({ '/': '/index.html', '/en/': '/en/index.html' });
 export const WRANGLER = Object.freeze({
   name: 'glossquote-label-printer', compatibility_date: '2026-10-18', workers_dev: false,
@@ -160,7 +161,7 @@ export async function buildProduction(root=ROOT) {
   const {assets,manifest}=await assemble(root);
   validateProductionAssets(assets);
   const directory=path.join(root,'dist-production');
-  try { await lstat(directory); await inspectTree(directory,[...PRODUCTION_FILES,'manifest.json'],{requireAll:false}); }
+  try { await lstat(directory); await inspectTree(directory,PRODUCTION_FILES,{requireAll:false}); }
   catch(error) { if(error.code!=='ENOENT') throw error; }
   await mkdir(directory,{recursive:true});
   for (const [file,bytes] of assets) {
@@ -168,7 +169,8 @@ export async function buildProduction(root=ROOT) {
     await mkdir(path.dirname(target),{recursive:true});
     await writeFile(target,bytes);
   }
-  await writeFile(contained(directory,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+  await checkManifestFile(root,true);
+  await writeFile(contained(root,PRODUCTION_MANIFEST),JSON.stringify(manifest,null,2)+'\n');
   await checkProduction(root);
   return manifest;
 }
@@ -177,11 +179,19 @@ export async function checkProduction(root=ROOT) {
   await checkSource(root,{syntax:false});
   const {assets,manifest}=await assemble(root);
   const directory=path.join(root,'dist-production');
-  await inspectTree(directory,[...PRODUCTION_FILES,'manifest.json']);
-  if(await readFile(contained(directory,'manifest.json'),'utf8')!==JSON.stringify(manifest,null,2)+'\n') throw new Error('Stale production source manifest');
+  await inspectTree(directory,PRODUCTION_FILES);
+  await checkManifestFile(root,false);
+  if(await readFile(contained(root,PRODUCTION_MANIFEST),'utf8')!==JSON.stringify(manifest,null,2)+'\n') throw new Error('Stale production source manifest');
   if(!isDeepStrictEqual(await fileRecords(directory,PRODUCTION_FILES),manifest.files)) throw new Error('Stale production output');
   validateProductionAssets(assets);
   return manifest;
+}
+
+async function checkManifestFile(root,allowMissing) {
+  try {
+    const stat=await lstat(contained(root,PRODUCTION_MANIFEST));
+    if(!stat.isFile()||stat.isSymbolicLink()||stat.nlink!==1) throw new Error('Unsafe external production manifest');
+  } catch(error) { if(!allowMissing||error.code!=='ENOENT') throw error; }
 }
 
 if (process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
