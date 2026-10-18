@@ -1,0 +1,17 @@
+{
+  "name": "@gloss-tools/label-printer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "dev": "node scripts/preview.mjs",
+    "test": "node --test --test-concurrency=1",
+    "check": "node scripts/check.mjs",
+    "build": "node scripts/build.mjs",
+    "build:production": "node scripts/production.mjs --build",
+    "check:production": "node scripts/production.mjs --check",
+    "preview:production": "node scripts/production-preview.mjs",
+    "release:check": "node scripts/production.mjs --release-check"
+  }
+}

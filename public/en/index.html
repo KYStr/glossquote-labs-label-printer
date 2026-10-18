@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Item Label Printer | Gloss Tools by GlossQuote</title>
+  <meta name="description" content="Enter one item name per line, choose copies per item, then arrange labels on A4 or Letter paper to print and cut by hand.">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <link rel="stylesheet" href="/assets/app.css">
+  <script type="module" src="/js/app.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to workspace</a>
+  <header class="topbar">
+    <span class="brand">Gloss Tools <span>by GlossQuote</span></span>
+    <nav aria-label="Language and home">
+      <button id="language" type="button" disabled data-enable>繁體中文</button>
+      <a href="https://glossquote.com/en/index.html">Back to English home</a>
+    </nav>
+  </header>
+  <main id="workspace">
+    <div class="introduction">
+      <h1>Item Label Printer</h1>
+      <p>Paste one item name per line, choose how many copies to print for each name, then build an A4 or Letter paper preview. Print it and cut the labels by hand.</p>
+      <p class="notice">This layout is for labels printed on plain paper and cut by hand. It is not a template for a specific brand of pre-cut labels. Browser and printer settings can change the physical size.</p>
+    </div>
+    <p id="startup-note" role="status">Preparing the workspace. If controls stay disabled, enable JavaScript and reload. Instructions remain available.</p>
+    <noscript><p class="notice">JavaScript is required to build a preview and print. Work controls are disabled; the form will not submit data.</p></noscript>
+    <form id="label-form" novalidate autocomplete="off">
+      <fieldset class="editor" disabled data-enable>
+        <legend>Names and layout</legend>
+        <div class="input-grid">
+          <div class="names-field">
+            <label for="items">Item names (one per line)</label>
+            <textarea id="items" rows="6" spellcheck="false" autocomplete="off" aria-describedby="items-help bytes-help items-error form-error"></textarea>
+            <p id="items-help" class="help">Enter one name per line; blank lines are skipped. The same copy count applies to every name. Enter 1–20 copies. Each name may use up to 80 Unicode code points; the expanded job is limited to 300 labels.</p>
+            <p id="bytes-help" class="help">The entire list may use up to 10 KiB (UTF-8), including spaces and line breaks.</p>
+            <p id="items-error" class="field-error" hidden></p>
+          </div>
+          <div class="settings">
+            <label for="copies">Copies per item</label>
+            <input id="copies" type="text" inputmode="numeric" value="1" autocomplete="off" spellcheck="false" aria-describedby="copies-help copies-error form-error">
+            <p id="copies-help" class="help">1–20; the same count applies to every name.</p>
+            <p id="copies-error" class="field-error" hidden></p>
+            <fieldset id="presets" class="preset-group" aria-describedby="preset-help preset-error form-error" disabled data-enable>
+              <legend>Plain-paper preset</legend>
+              <div class="preset-options">
+                <label class="preset-choice"><input type="radio" value="a4-2x7" checked aria-describedby="preset-help preset-error form-error"><span>A4 2×7<small>14 cells per page</small></span></label>
+                <label class="preset-choice"><input type="radio" value="a4-3x8" aria-describedby="preset-help preset-error form-error"><span>A4 3×8<small>24 cells per page</small></span></label>
+                <label class="preset-choice"><input type="radio" value="letter-2x7" aria-describedby="preset-help preset-error form-error"><span>Letter 2×7<small>14 cells per page</small></span></label>
+                <label class="preset-choice"><input type="radio" value="letter-3x8" aria-describedby="preset-help preset-error form-error"><span>Letter 3×8<small>24 cells per page</small></span></label>
+              </div>
+              <p id="preset-help" class="help">Portrait paper · 10 mm margins · 2 mm gaps</p>
+              <p id="preset-error" class="field-error" hidden></p>
+            </fieldset>
+          </div>
+        </div>
+        <p id="form-error" class="error-summary" role="alert" hidden></p>
+        <div class="form-actions">
+          <div class="secondary-actions">
+            <button id="example" type="button" disabled data-enable>Load example</button>
+            <button id="clear" type="button" disabled data-enable>Clear</button>
+          </div>
+          <button id="build" type="submit" class="primary" disabled data-enable>Build preview</button>
+        </div>
+        <p class="help example-help">The example is fictional. Build a preview after loading it.</p>
+      </fieldset>
+    </form>
+    <p class="data-note">Your input stays in this page and is not saved. The first load still downloads the website files.</p>
+    <section class="preview-area" aria-labelledby="preview-title">
+      <div class="preview-heading">
+        <div>
+          <h2 id="preview-title">Page preview</h2>
+          <p class="help">Check the name order, copies, preset and page count. Unused cells on the last page stay blank.</p>
+        </div>
+        <button id="print" type="button" class="primary" disabled hidden>Print labels</button>
+      </div>
+      <p id="status" class="status" role="status" aria-live="polite" aria-atomic="true">No preview yet. Paste item names and build a preview to see the label pages here.</p>
+      <div id="preview-idle" class="empty-paper" aria-hidden="true"><span>A4 / Letter</span></div>
+      <div id="preview" hidden>
+        <p id="preview-summary" class="preview-summary"></p>
+        <p class="help scroll-help">Paper keeps its layout proportions. On small screens, scroll inside each label page.</p>
+        <div id="pages"></div>
+      </div>
+      <p class="print-help">Choose the matching paper, set scale to 100%, and turn off headers and footers. Test on plain paper and measure before cutting.</p>
+      <p class="help">Native print preview and physical dimensions have not been verified. Mobile printing depends on your device.</p>
+    </section>
+    <section class="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Using this tool</h2>
+      <details><summary>How many copies are printed for each name?</summary><p>One copy count applies to every nonblank line. Copies of one name are grouped together before the next name.</p></details>
+      <details><summary>Can I use this with pre-cut label sheets?</summary><p>The presets are for labels printed on plain A4 or Letter paper and cut by hand. They are not calibrated for a specific pre-cut label brand or model.</p></details>
+      <details><summary>How can I keep the printed size close to the layout?</summary><p>Select the matching paper, use 100% scale, and turn off headers and footers. Printer margins can still affect the result, so measure a plain-paper test first.</p></details>
+      <details><summary>Is my list saved or uploaded?</summary><p>This version processes the list in the current page and does not save or upload it. The first page load still downloads static website files.</p></details>
+    </section>
+  </main>
+  <footer><p>A loaded tab can calculate locally; a first load while offline is not guaranteed.</p></footer>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-body">
+    <h2 id="confirm-title"></h2>
+    <p id="confirm-body"></p>
+    <div class="dialog-actions">
+      <button id="confirm-cancel" type="button" disabled data-enable autofocus>Cancel</button>
+      <button id="confirm-accept" type="button" class="primary" disabled data-enable>Clear</button>
+    </div>
+  </dialog>
+</body>
+</html>

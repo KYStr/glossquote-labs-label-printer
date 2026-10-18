@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "30-label-printer",
+  "slug": "label-printer",
+  "title": "物品標籤列印",
+  "implementationStatus": "M2-source-candidate-awaiting-primary-review",
+  "requestedModel": "gpt-6.1-sol",
+  "requestedReasoningEffort": "max",
+  "backendIdentityStatus": "not-independently-confirmed",
+  "activeMilestone": "M2",
+  "subdomain": "labels",
+  "port": 4210,
+  "spikePort": 5210,
+  "sourceRepository": "https://github.com/KYStr/glossquote-labs-label-printer",
+  "hostingStatus": "not-deployed-by-feature-chat",
+  "externalReviewStatus": "not-run",
+  "uiTestRestriction": "dedicated-hidden-browser-tabs-only-no-native-os-dialog-or-clipboard-control"
+}

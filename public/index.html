@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>物品標籤列印｜Gloss Tools by GlossQuote</title>
+  <meta name="description" content="逐行輸入物品名稱，設定每項份數，排成 A4 或 Letter 普通紙標籤頁，列印後手動裁切。">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <link rel="stylesheet" href="/assets/app.css">
+  <script type="module" src="/js/app.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">跳至工作區</a>
+  <header class="topbar">
+    <span class="brand">Gloss Tools <span>by GlossQuote</span></span>
+    <nav aria-label="語言與首頁">
+      <button id="language" type="button" disabled data-enable>English</button>
+      <a href="https://glossquote.com/index.html">返回繁中首頁</a>
+    </nav>
+  </header>
+  <main id="workspace">
+    <div class="introduction">
+      <h1>物品標籤列印</h1>
+      <p>把物品名稱逐行貼上，設定每個名稱要印幾份，選擇 A4 或 Letter 普通紙版型，建立預覽後列印裁切。</p>
+      <p class="notice">這是普通紙裁切用版型，不是特定品牌預裁貼紙套版。瀏覽器、列印縮放和印表機可能影響實際尺寸。</p>
+    </div>
+    <p id="startup-note" role="status">正在準備工作區。若無法啟用，請確認 JavaScript 已開啟後重新載入；說明仍可閱讀。</p>
+    <noscript><p class="notice">需要 JavaScript 才能建立預覽及列印。輸入控制已停用；表單不會提交資料。</p></noscript>
+    <form id="label-form" novalidate autocomplete="off">
+      <fieldset class="editor" disabled data-enable>
+        <legend>名稱與版型</legend>
+        <div class="input-grid">
+          <div class="names-field">
+            <label for="items">物品名稱（每行一項）</label>
+            <textarea id="items" rows="6" spellcheck="false" autocomplete="off" aria-describedby="items-help bytes-help items-error form-error"></textarea>
+            <p id="items-help" class="help">每行一個名稱；空白行會略過。每個名稱使用相同份數，請輸入 1–20。每行最多 80 個 Unicode code points，全部展開最多 300 張標籤。</p>
+            <p id="bytes-help" class="help">整份清單最多 10 KiB（UTF-8），包含空白及換行。</p>
+            <p id="items-error" class="field-error" hidden></p>
+          </div>
+          <div class="settings">
+            <label for="copies">每項份數</label>
+            <input id="copies" type="text" inputmode="numeric" value="1" autocomplete="off" spellcheck="false" aria-describedby="copies-help copies-error form-error">
+            <p id="copies-help" class="help">1–20；同一份數套用到所有名稱。</p>
+            <p id="copies-error" class="field-error" hidden></p>
+            <fieldset id="presets" class="preset-group" aria-describedby="preset-help preset-error form-error" disabled data-enable>
+              <legend>普通紙版型</legend>
+              <div class="preset-options">
+                <label class="preset-choice"><input type="radio" value="a4-2x7" checked aria-describedby="preset-help preset-error form-error"><span>A4 2×7<small>每頁 14 格</small></span></label>
+                <label class="preset-choice"><input type="radio" value="a4-3x8" aria-describedby="preset-help preset-error form-error"><span>A4 3×8<small>每頁 24 格</small></span></label>
+                <label class="preset-choice"><input type="radio" value="letter-2x7" aria-describedby="preset-help preset-error form-error"><span>Letter 2×7<small>每頁 14 格</small></span></label>
+                <label class="preset-choice"><input type="radio" value="letter-3x8" aria-describedby="preset-help preset-error form-error"><span>Letter 3×8<small>每頁 24 格</small></span></label>
+              </div>
+              <p id="preset-help" class="help">直向紙張 · 頁邊 10 mm · 格距 2 mm</p>
+              <p id="preset-error" class="field-error" hidden></p>
+            </fieldset>
+          </div>
+        </div>
+        <p id="form-error" class="error-summary" role="alert" hidden></p>
+        <div class="form-actions">
+          <div class="secondary-actions">
+            <button id="example" type="button" disabled data-enable>載入範例</button>
+            <button id="clear" type="button" disabled data-enable>清除</button>
+          </div>
+          <button id="build" type="submit" class="primary" disabled data-enable>建立預覽</button>
+        </div>
+        <p class="help example-help">範例是假資料，載入後請再建立預覽。</p>
+      </fieldset>
+    </form>
+    <p class="data-note">輸入只在目前頁面處理，不會保存。第一次載入仍需下載網站檔案。</p>
+    <section class="preview-area" aria-labelledby="preview-title">
+      <div class="preview-heading">
+        <div>
+          <h2 id="preview-title">頁面預覽</h2>
+          <p class="help">先核對名稱順序、每項份數、版型和頁數。最後一頁未用格會保持空白。</p>
+        </div>
+        <button id="print" type="button" class="primary" disabled hidden>列印標籤</button>
+      </div>
+      <p id="status" class="status" role="status" aria-live="polite" aria-atomic="true">尚未建立預覽。貼上名稱並建立預覽後，標籤頁會顯示在這裡。</p>
+      <div id="preview-idle" class="empty-paper" aria-hidden="true"><span>A4 / Letter</span></div>
+      <div id="preview" hidden>
+        <p id="preview-summary" class="preview-summary"></p>
+        <p class="help scroll-help">紙張以實際版面比例呈現；小螢幕可在標籤頁區域內捲動。</p>
+        <div id="pages"></div>
+      </div>
+      <p class="print-help">請選擇相同紙張、縮放 100%，並關閉頁首頁尾。先用普通紙試印，量測後再裁切。</p>
+      <p class="help">原生列印預覽與實際紙張尺寸尚未驗證。手機列印依裝置支援。</p>
+    </section>
+    <section class="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">使用說明</h2>
+      <details><summary>每個名稱會印幾份？</summary><p>所有非空白行共用同一個份數；每個名稱的副本會連在一起，再排下一個名稱。</p></details>
+      <details><summary>這可以套用到預裁貼紙嗎？</summary><p>這是 A4 或 Letter 普通紙裁切用版型，不保證符合任何品牌或型號的預裁貼紙。</p></details>
+      <details><summary>怎麼讓實際尺寸更接近版面？</summary><p>列印時選擇相同紙張、縮放 100%、關閉頁首頁尾；印表機不可列印邊界仍可能影響結果，請先用普通紙量測。</p></details>
+      <details><summary>輸入清單會保存或上傳嗎？</summary><p>本版只在目前頁面記憶體處理，不保存或上傳；第一次開頁仍需下載網站靜態檔案。</p></details>
+    </section>
+  </main>
+  <footer><p>目前分頁載入完成後可本機運算；不保證離線首次載入。</p></footer>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-body">
+    <h2 id="confirm-title"></h2>
+    <p id="confirm-body"></p>
+    <div class="dialog-actions">
+      <button id="confirm-cancel" type="button" disabled data-enable autofocus>取消</button>
+      <button id="confirm-accept" type="button" class="primary" disabled data-enable>清除</button>
+    </div>
+  </dialog>
+</body>
+</html>

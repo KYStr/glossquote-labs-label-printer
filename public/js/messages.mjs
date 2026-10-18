@@ -1,0 +1,63 @@
+export const messages = {
+  'zh-Hant': {
+    idle: '尚未建立預覽。貼上名稱並建立預覽後，標籤頁會顯示在這裡。',
+    changed: '輸入已修改。請重新建立預覽。',
+    example: '已載入假資料範例；請按「建立預覽」。',
+    ready: (total, pages) => `預覽已建立：${total} 張標籤，共 ${pages} 頁。`,
+    summary: (r) => `${r.paperSize} ${r.columns}×${r.rows} · ${r.itemCount} 個名稱 · 每項 ${r.copiesPerItem} 份`,
+    page: (index, count) => `第 ${index} 頁，共 ${count} 頁`,
+    sample: '範例物品 A\n範例物品 B\n範例物品 A',
+    clearTitle: '清除目前工作',
+    clearBody: '清除會移除目前清單、設定和預覽。要清除嗎？',
+    clearConfirm: '清除', clearCancel: '取消',
+    languageTitle: '切換語言',
+    languageBody: '切換語言會清除目前清單、設定和預覽。要繼續嗎？',
+    languageConfirm: '清除並切換', languageCancel: '留在此頁',
+    errors: {
+      invalid_schema: '無法讀取這份清單。請重新載入頁面後再試。',
+      invalid_items_type: '清單格式無效。請重新貼上物品名稱。',
+      invalid_unicode: '名稱清單含無法處理的 Unicode 字元。請修正後再試。',
+      items_too_large: '清單超過 10 KiB。請縮短後再試。',
+      invalid_copies_format: '請輸入 1–20 的整數，不含空白、小數或前導零。',
+      copies_out_of_range: '每項份數必須介於 1 到 20。',
+      invalid_preset: '請選擇四種支援版型之一。',
+      item_control_character: '第 {line} 行含不支援的控制或行分隔字元。',
+      item_too_long: '第 {line} 行超過 80 個 Unicode code points。',
+      no_items: '請至少輸入一個物品名稱。',
+      too_many_labels: '展開後超過 300 張標籤。請減少名稱數或每項份數。',
+    },
+  },
+  en: {
+    idle: 'No preview yet. Paste item names and build a preview to see the label pages here.',
+    changed: 'Input changed. Build a new preview.',
+    example: 'Fictional example loaded. Select Build preview to continue.',
+    ready: (total, pages) => `Preview ready: ${total} labels across ${pages} pages.`,
+    summary: (r) => `${r.paperSize} ${r.columns}×${r.rows} · ${r.itemCount} names · ${r.copiesPerItem} copies per item`,
+    page: (index, count) => `Page ${index} of ${count}`,
+    sample: 'Example item A\nExample item B\nExample item A',
+    clearTitle: 'Clear current work',
+    clearBody: 'Clearing removes the current list, settings, and preview. Clear them now?',
+    clearConfirm: 'Clear', clearCancel: 'Cancel',
+    languageTitle: 'Change language',
+    languageBody: 'Changing language clears the current list, settings, and preview. Continue?',
+    languageConfirm: 'Clear and switch', languageCancel: 'Stay here',
+    errors: {
+      invalid_schema: 'The list could not be read. Reload the page and try again.',
+      invalid_items_type: 'The list format is invalid. Paste the item names again.',
+      invalid_unicode: 'The item list contains invalid Unicode. Correct the text and try again.',
+      items_too_large: 'The list is larger than 10 KiB. Shorten it and try again.',
+      invalid_copies_format: 'Enter a whole number from 1–20, without spaces, decimals, or leading zeros.',
+      copies_out_of_range: 'Copies per item must be from 1 to 20.',
+      invalid_preset: 'Choose one of the four supported presets.',
+      item_control_character: 'Line {line} contains an unsupported control character or line separator.',
+      item_too_long: 'Line {line} is longer than 80 Unicode code points.',
+      no_items: 'Enter at least one item name.',
+      too_many_labels: 'The expanded job exceeds 300 labels. Reduce the number of names or copies per item.',
+    },
+  },
+};
+
+export function errorMessage(copy, error) {
+  const match = /^itemsRaw\.lines\[(\d+)\]$/.exec(error.field);
+  return copy.errors[error.code].replace('{line}', match ? String(Number(match[1]) + 1) : '');
+}
